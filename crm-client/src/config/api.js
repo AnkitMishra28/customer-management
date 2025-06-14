@@ -22,7 +22,14 @@ export const getApiUrl = (endpoint) => {
     // In development, use localhost:3000
     return `http://localhost:3000/${cleanEndpoint}`;
   } else {
-    // In production, use the same domain with /api prefix
-    return `${window.location.origin}/api/${cleanEndpoint}`;
+    // In production, use the same domain
+    // Note: Some endpoints need /api prefix, others don't
+    // Routes like /jwt, /users, /adminCount, etc. don't need /api prefix
+    // Routes like /api/tasks, /api/leads, etc. already have /api prefix
+    if (cleanEndpoint.startsWith('api/')) {
+      return `${window.location.origin}/${cleanEndpoint}`;
+    } else {
+      return `${window.location.origin}/${cleanEndpoint}`;
+    }
   }
 }; 

@@ -21,11 +21,6 @@ import { Context } from '../provider/AuthProvider';
 import { FaBell } from 'react-icons/fa';
 import { getApiUrl } from '../config/api';
 
-const fetchTicket = async () => {
-  const response = await axios.get(`http://localhost:3000/resolveTicket`);
-  return response.data;
-};
-
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
