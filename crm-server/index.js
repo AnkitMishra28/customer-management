@@ -12,7 +12,12 @@ const bcrypt = require("bcryptjs");
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173", // Development
+      "https://customer-management-*.vercel.app", // Vercel preview deployments
+      "https://customer-management.vercel.app", // Vercel production
+      /^https:\/\/.*\.vercel\.app$/, // Any Vercel subdomain
+    ],
     credentials: true,
   })
 );

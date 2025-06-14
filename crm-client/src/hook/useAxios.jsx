@@ -3,10 +3,11 @@ import React, { useContext, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../provider/AuthProvider';
+import { API_BASE_URL } from '../config/api';
 
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: API_BASE_URL,
     withCredentials: true // Correct property name and syntax
   });
 

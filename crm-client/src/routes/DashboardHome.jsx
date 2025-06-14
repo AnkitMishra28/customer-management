@@ -17,9 +17,10 @@ import useemployeeCount from '../hook/useEmployeecount';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import useLead from '../hook/useLead';
+import { getApiUrl } from '../config/api';
 
 const fetchUsers = async () => {
-  const response = await axios.get(`http://localhost:3000/paymentDetails`);
+  const response = await axios.get(getApiUrl('paymentDetails'));
   return response.data;
 };
 
