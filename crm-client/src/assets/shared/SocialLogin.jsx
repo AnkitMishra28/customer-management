@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FaGoogle } from 'react-icons/fa';
 import { Context } from '../../provider/AuthProvider';
+import { getApiUrl } from '../../config/api';
 
 
 const SocialLogin = () => {
@@ -29,7 +30,7 @@ const SocialLogin = () => {
                 role:"executives"
 
             }
-            axios.post("http://localhost:3000/users",usersData)
+            axios.post(getApiUrl("users"),usersData)
             .then((res)=>{
                 if(res.data.insertedId){
                     // alert("user added")

@@ -1,16 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React from 'react'
-
-const fetchUsers = async () => {
-    const response = await axios.get(`http://localhost:3000/employeeCount`);
-    return response.data;
-  };
+import { getApiUrl } from '../config/api';
 
 const useemployeeCount = () => {
+    const fetchUsers = async () => {
+        const response = await axios.get(getApiUrl('employeeCount'));
+        return response.data;
+    };
 
-  
-    
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: employee = [], isLoading:employeeLoading } = useQuery({
         queryKey: ["employee"], // The unique key for this query

@@ -19,6 +19,7 @@ import { useQuery } from '@tanstack/react-query';
 import useLead from '../hook/useLead';
 import { Context } from '../provider/AuthProvider';
 import { FaBell } from 'react-icons/fa';
+import { getApiUrl } from '../config/api';
 
 const fetchTicket = async () => {
   const response = await axios.get(`http://localhost:3000/resolveTicket`);
@@ -37,46 +38,45 @@ const DashboardE = () => {
   let [task] = useTask();
   let [lead] = useLead();
 
-  const { data: myticket = [] } = useQuery({
-    queryKey: ["myticket"],
-    queryFn: fetchTicket,
+  const { data: resolvedTickets = [] } = useQuery({
+    queryKey: ["resolvedTickets"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl('resolveTicket'));
+      return response.data;
+    },
   });
 
-  const fetchLead = async () => {
-  const response = await axios.get(`http://localhost:3000/myLead/${user?.email}`);
-  return response.data;
-};
-const fetchTask = async () => {
-  const response = await axios.get(`http://localhost:3000/myTask/${user?.email}`);
-  return response.data;
-};
-const fetchReview = async () => {
-  const response = await axios.get(`http://localhost:3000/myreview/${user?.email}`);
-  return response.data;
-};
-const fetchFollowup = async () => {
-  const response = await axios.get(`http://localhost:3000/myfollowup/${user?.email}`);
-  return response.data;
-};
+  const { data: myLeads = [] } = useQuery({
+    queryKey: [user?.email, "myLeads"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl(`myLead/${user?.email}`));
+      return response.data;
+    },
+  });
 
+  const { data: myTasks = [] } = useQuery({
+    queryKey: [user?.email, "myTasks"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl(`myTask/${user?.email}`));
+      return response.data;
+    },
+  });
 
-  const { data: myLead = [] } = useQuery({
-    queryKey: ["myLead"],
-    queryFn: fetchLead,
+  const { data: myReviews = [] } = useQuery({
+    queryKey: [user?.email, "myReviews"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl(`myreview/${user?.email}`));
+      return response.data;
+    },
   });
-  const { data: myReview= [] } = useQuery({
-    queryKey: ["myReview"],
-    queryFn: fetchReview,
+
+  const { data: myFollowups = [] } = useQuery({
+    queryKey: [user?.email, "myFollowups"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl(`myfollowup/${user?.email}`));
+      return response.data;
+    },
   });
-  const { data: myTask = [] } = useQuery({
-    queryKey: ["myTask"],
-    queryFn: fetchTask,
-  });
-  const { data: myFollowp = [] } = useQuery({
-    queryKey: ["myFollowp"],
-    queryFn: fetchFollowup,
-  });
-  
 
   // Animation variants for cards
   const cardVariants = {
@@ -87,25 +87,25 @@ const fetchFollowup = async () => {
   const dashboardData = [
     {
       title: 'My Reviews',
-      value: myReview.length,
+      value: myReviews.length,
       icon: '👥',
       color: '',
     },
     {
       title: 'My Follow Up',
-      value: myFollowp.length,
+      value: myFollowups.length,
       icon: '🛡️',
       color: '',
     },
     {
       title: 'My Task',
-      value: myTask.length,
+      value: myTasks.length,
       icon: '💼',
       color: '',
     },
     {
       title: 'My Lead',
-      value: myLead.length,
+      value: myLeads.length,
       icon: '📋',
       color: '',
     },
@@ -221,17 +221,14 @@ const fetchFollowup = async () => {
   };
 
   // Fetch follow-up reminders for the executive
-  const fetchReminders = async () => {
-    const response = await axios.get('http://localhost:3000/executive/followup-reminders', {
-      withCredentials: true,
-    });
-    return response.data;
-  };
-
-  const { data: remindersData = { pending: [] }, isLoading: remindersLoading } = useQuery({
-    queryKey: ['followupReminders', user?.email],
-    queryFn: fetchReminders,
-    enabled: !!user?.email,
+  const { data: followupReminders = [] } = useQuery({
+    queryKey: [user?.email, "followupReminders"],
+    queryFn: async () => {
+      const response = await axios.get(getApiUrl('executive/followup-reminders'), {
+        withCredentials: true,
+      });
+      return response.data;
+    },
   });
 
   return (
@@ -247,7 +244,7 @@ const fetchFollowup = async () => {
             Dashboard Overview
           </motion.h2>
           {/* Follow-up Reminders Alert */}
-          {remindersData.pending.length > 0 && (
+          {followupReminders.length > 0 && (
             <motion.div
               className="mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded shadow flex flex-col gap-2"
               initial={{ opacity: 0, y: -20 }}
@@ -257,7 +254,7 @@ const fetchFollowup = async () => {
               <div className="flex items-center mb-2">
                 <FaBell className="text-yellow-500 mr-2 text-xl" />
                 <span className="font-semibold text-yellow-800 text-lg">
-                  You have {remindersData.pending.length} pending/missed follow-up(s)!
+                  You have {followupReminders.length} pending/missed follow-up(s)!
                 </span>
               </div>
               <div className="overflow-x-auto">
@@ -270,7 +267,7 @@ const fetchFollowup = async () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {remindersData.pending.map((fu, idx) => (
+                    {followupReminders.map((fu, idx) => (
                       <tr key={fu._id || idx} className="bg-yellow-50">
                         <td className="py-2 px-3">{fu.customerName || fu.name || '-'}</td>
                         <td className="py-2 px-3">{fu.followUpDate}</td>
