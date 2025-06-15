@@ -140,6 +140,10 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
+  // Add additional connection options for serverless environments
+  connectTimeoutMS: 10000, // Give 10 seconds to establish initial connection
+  socketTimeoutMS: 45000,  // Keep sockets open for 45 seconds before timing out
+  serverSelectionTimeoutMS: 30000, // Still 30 seconds for server selection
 });
 
 async function run() {
