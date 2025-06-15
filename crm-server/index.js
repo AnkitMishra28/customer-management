@@ -224,22 +224,34 @@ async function run() {
 
     app.post("/jwt", async (req, res) => {
       let userData = req.body;
+      console.log('Attempting to sign JWT for:', userData.email);
+      console.log('JWT_Secret available:', !!process.env.JWT_Secret);
 
-      let token = jwt.sign(userData, process.env.JWT_Secret, {
-        expiresIn: "1h",
-      });
+      if (!process.env.JWT_Secret) {
+        console.error('JWT_Secret environment variable is not set!');
+        return res.status(500).send({ message: 'Server configuration error: JWT secret not found.' });
+      }
 
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          // secure:false  ,    // Prevent JavaScript access to the cookie
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // Send cookie over HTTPS only
-        })
-        .send({ success: true });
+      try {
+        let token = jwt.sign(userData, process.env.JWT_Secret, {
+          expiresIn: "1h",
+        });
 
-        // Log user login activity
-        logActivity(userData.email, 'User Login', { ipAddress: req.ip });
+        res
+          .cookie("token", token, {
+            httpOnly: true,
+            // secure:false  ,    // Prevent JavaScript access to the cookie
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // Send cookie over HTTPS only
+          })
+          .send({ success: true });
+
+          // Log user login activity
+          logActivity(userData.email, 'User Login', { ipAddress: req.ip });
+      } catch (error) {
+        console.error("Error signing JWT:", error);
+        res.status(500).send({ message: 'Failed to generate JWT', error: error.message });
+      }
     });
 
     app.post("/logout", (req, res) => {
@@ -834,31 +846,39 @@ async function run() {
     });
 
     app.get("/users/admin/:email", async (req, res) => {
-      let email = req.params.email;
+      try {
+        let email = req.params.email;
+        let query = { email };
+        let user = await userCollection.findOne(query);
 
-      let query = { email };
-      let user = await userCollection.findOne(query);
+        let admin = false;
+        if (user) {
+          admin = user?.role === "admin";
+        }
 
-      let admin = false;
-      if (user) {
-        admin = user?.role === "admin";
+        res.send({ admin });
+      } catch (error) {
+        console.error("Error in /users/admin/:email:", error);
+        res.status(500).send({ message: "Internal server error fetching admin status." });
       }
-
-      res.send({ admin });
     });
 
     app.get("/users/executive/:email", async (req, res) => {
-      let email = req.params.email;
+      try {
+        let email = req.params.email;
+        let query = { email };
+        let user = await userCollection.findOne(query);
 
-      let query = { email };
-      let user = await userCollection.findOne(query);
+        let executive = false;
+        if (user) {
+          executive = user?.role === "executives";
+        }
 
-      let executive = false;
-      if (user) {
-        executive = user?.role === "executives";
+        res.send({ executive });
+      } catch (error) {
+        console.error("Error in /users/executive/:email:", error);
+        res.status(500).send({ message: "Internal server error fetching executive status." });
       }
-
-      res.send({ executive });
     });
 
     app.get("/users",async(req,res)=>{
