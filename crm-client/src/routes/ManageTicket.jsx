@@ -3,21 +3,22 @@ import axios from 'axios';
 import React from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { getApiUrl } from "../config/api";
 
 const ManageTicket = () => {
-  const fetchUsers = async () => {
-    const response = await axios.get(`http://localhost:3000/alltickets`);
+  const fetchTickets = async () => {
+    const response = await axios.get(getApiUrl(`alltickets`));
     return response.data;
   };
 
   const { data: allticket = [], isLoading: allticketLoading, refetch } = useQuery({
     queryKey: ["allticket"],
-    queryFn: fetchUsers,
+    queryFn: fetchTickets,
   });
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:3000/api/tickets/${id}`, {
+      await axios.patch(getApiUrl(`api/tickets/${id}`), {
         status: newStatus,
       });
       refetch();
@@ -39,7 +40,7 @@ const ManageTicket = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/tickets/${id}`);
+          await axios.delete(getApiUrl(`api/tickets/${id}`));
           refetch();
           Swal.fire('Deleted!', 'Ticket has been deleted.', 'success');
         } catch (err) {

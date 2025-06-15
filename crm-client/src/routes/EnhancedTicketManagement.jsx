@@ -16,6 +16,7 @@ import {
   FaEye
 } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { getApiUrl } from "../config/api";
 
 const EnhancedTicketManagement = () => {
   const { user } = useContext(Context);
@@ -25,7 +26,7 @@ const EnhancedTicketManagement = () => {
 
   // Fetch all tickets
   const fetchAllTickets = async () => {
-    const response = await axios.get('http://localhost:3000/alltickets', {
+    const response = await axios.get(getApiUrl('alltickets'), {
       withCredentials: true,
     });
     return response.data;
@@ -33,7 +34,7 @@ const EnhancedTicketManagement = () => {
 
   // Fetch ticket TAT analytics
   const fetchTicketTAT = async () => {
-    const response = await axios.get('http://localhost:3000/admin/ticket-tat', {
+    const response = await axios.get(getApiUrl('admin/ticket-tat'), {
       withCredentials: true,
     });
     return response.data;
@@ -41,7 +42,7 @@ const EnhancedTicketManagement = () => {
 
   // Fetch high priority tickets
   const fetchHighPriorityTickets = async () => {
-    const response = await axios.get('http://localhost:3000/admin/high-priority-tickets', {
+    const response = await axios.get(getApiUrl('admin/high-priority-tickets'), {
       withCredentials: true,
     });
     return response.data;
@@ -68,7 +69,7 @@ const EnhancedTicketManagement = () => {
   const assignTicketMutation = useMutation({
     mutationFn: async ({ ticketId, assignmentData }) => {
       const response = await axios.patch(
-        `http://localhost:3000/admin/tickets/${ticketId}/assign`,
+        getApiUrl(`admin/tickets/${ticketId}/assign`),
         assignmentData,
         {
           withCredentials: true,

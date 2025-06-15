@@ -3,11 +3,12 @@ import axios from 'axios';
 import React from 'react'
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { getApiUrl } from "../config/api";
 
 const ManageFollowUp = () => {
 
      const fetchUsers = async () => {
-        const response = await axios.get(`http://localhost:3000/manageFollowup`);
+        const response = await axios.get(getApiUrl(`manageFollowup`));
         return response.data;
       };
 
@@ -21,7 +22,7 @@ const ManageFollowUp = () => {
 
       const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:3000/api/followups/${id}`, {
+      await axios.patch(getApiUrl(`api/followups/${id}`), {
         status: newStatus,
       });
       refetch();
@@ -43,7 +44,7 @@ const ManageFollowUp = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/followups/${id}`);
+          await axios.delete(getApiUrl(`api/followups/${id}`));
           refetch();
           Swal.fire('Deleted!', 'Follow-up has been deleted.', 'success');
         } catch (err) {

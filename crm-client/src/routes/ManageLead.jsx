@@ -6,13 +6,14 @@ import Swal from 'sweetalert2';
 import { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // ✅ This is required separately
+import { getApiUrl } from "../config/api";
 
 
 
 const ManageLead = () => {
 
-      const fetchUsers = async () => {
-        const response = await axios.get(`http://localhost:3000/manageLead`);
+      const fetchLeads = async () => {
+        const response = await axios.get(getApiUrl(`manageLead`));
         return response.data;
       };
 
@@ -21,12 +22,12 @@ const ManageLead = () => {
    
     const { data: alllead = [], isLoading:allleadLoading,refetch } = useQuery({
         queryKey: ["alllead"], // The unique key for this query
-        queryFn: fetchUsers, // Function to fetch the data
+        queryFn: fetchLeads, // Function to fetch the data
       });
 
         const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:3000/api/leads/${id}`, {
+      await axios.patch(getApiUrl(`api/leads/${id}`), {
         
         status: newStatus,
       });
@@ -50,7 +51,7 @@ const ManageLead = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/leads/${id}`);
+          await axios.delete(getApiUrl(`api/leads/${id}`));
           refetch()
           Swal.fire("Deleted!", "Lead has been deleted.", "success");
           

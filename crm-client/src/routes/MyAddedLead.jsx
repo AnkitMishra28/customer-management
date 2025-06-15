@@ -4,13 +4,14 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { motion } from "framer-motion";
+import { getApiUrl } from "../config/api";
 
 const MyAddedLead = () => {
 
     let {user}= useContext(Context)
 
-    const fetchUsers = async () => {
-        const response = await axios.get(`http://localhost:3000/myleads/${user?.email}`);
+    const fetchMyLeads = async () => {
+        const response = await axios.get(getApiUrl(`myleads/${user?.email}`));
         return response.data;
       };
 
@@ -19,12 +20,12 @@ const MyAddedLead = () => {
    
     const { data: mylead = [], isLoading:myleadLoading,refetch } = useQuery({
         queryKey: [user?.email,"mylead"], // The unique key for this query
-        queryFn: fetchUsers, // Function to fetch the data
+        queryFn: fetchMyLeads, // Function to fetch the data
       });
 
        const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:3000/api/leads/${id}`, {
+      await axios.patch(getApiUrl(`api/leads/${id}`), {
         
         status: newStatus,
       });
@@ -48,7 +49,7 @@ const MyAddedLead = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/leads/${id}`);
+          await axios.delete(getApiUrl(`api/leads/${id}`));
           refetch()
           Swal.fire("Deleted!", "Lead has been deleted.", "success");
           

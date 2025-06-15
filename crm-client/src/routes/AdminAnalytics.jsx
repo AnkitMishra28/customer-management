@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { Context } from "../provider/AuthProvider";
 import Loading from "../component/loading.jsx";
+import { getApiUrl } from "../config/api";
 import { 
   FaChartLine, 
   FaUsers, 
@@ -30,7 +31,7 @@ const AdminAnalytics = () => {
           executiveEmail: selectedExecutive || undefined,
         },
       };
-      const response = await axios.get('http://localhost:3000/admin/performance-metrics', config);
+      const response = await axios.get(getApiUrl('admin/performance-metrics'), config);
       return response.data;
     } catch (error) {
       console.error("Error fetching performance metrics:", error);
@@ -46,7 +47,7 @@ const AdminAnalytics = () => {
           period: selectedPeriod,
         },
       };
-      const response = await axios.get('http://localhost:3000/admin/lead-analytics', config);
+      const response = await axios.get(getApiUrl('admin/lead-analytics'), config);
       return response.data;
     } catch (error) {
       console.error("Error fetching lead analytics:", error);
@@ -59,7 +60,7 @@ const AdminAnalytics = () => {
       const config = {
         withCredentials: true,
       };
-      const response = await axios.get('http://localhost:3000/admin/dashboard-summary', config);
+      const response = await axios.get(getApiUrl('admin/dashboard-summary'), config);
       return response.data;
     } catch (error) {
       console.error("Error fetching dashboard summary:", error);
@@ -68,14 +69,14 @@ const AdminAnalytics = () => {
   };
 
   const fetchOverdueFollowups = async () => {
-    const response = await axios.get('http://localhost:3000/admin/overdue-followups', {
+    const response = await axios.get(getApiUrl('admin/overdue-followups'), {
       withCredentials: true,
     });
     return response.data;
   };
 
   const fetchOverdueLeads = async () => {
-    const response = await axios.get('http://localhost:3000/admin/overdue-leads', {
+    const response = await axios.get(getApiUrl('admin/overdue-leads'), {
       withCredentials: true,
     });
     return response.data;

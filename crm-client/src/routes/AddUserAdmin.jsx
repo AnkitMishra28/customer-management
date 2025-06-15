@@ -4,6 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { Context } from "../provider/AuthProvider";
+import { getApiUrl } from "../config/api";
 
 const AddUserAdmin = () => {
   const { user } = useContext(Context); // Get user from auth context, assuming it contains token if needed for axios headers
@@ -32,7 +33,7 @@ const AddUserAdmin = () => {
         },
       };
 
-      const res = await axios.post('http://localhost:3000/admin/add-user', formData, config);
+      const res = await axios.post(getApiUrl('admin/add-user'), formData, config);
 
       if (res.status === 201) {
         Swal.fire({

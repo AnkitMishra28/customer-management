@@ -23,10 +23,24 @@ export const getApiUrl = (endpoint) => {
     return `http://localhost:3000/${cleanEndpoint}`;
   } else {
     // In production, use the same domain
-    // Note: Some endpoints need /api prefix, others don't
-    // Routes like /jwt, /users, /adminCount, etc. don't need /api prefix
-    // Routes like /api/tasks, /api/leads, etc. already have /api prefix
-    if (cleanEndpoint.startsWith('api/')) {
+    // Based on the server routes, most endpoints don't need /api prefix
+    // Only specific endpoints that are explicitly defined with /api in the server
+    const apiPrefixEndpoints = [
+      'api/tasks',
+      'api/leads', 
+      'api/followups',
+      'api/tickets',
+      'api/reviews',
+      'api/notifications',
+      'api/activity-logs'
+    ];
+    
+    // Check if this endpoint should have /api prefix
+    const needsApiPrefix = apiPrefixEndpoints.some(apiEndpoint => 
+      cleanEndpoint.startsWith(apiEndpoint)
+    );
+    
+    if (needsApiPrefix) {
       return `${window.location.origin}/${cleanEndpoint}`;
     } else {
       return `${window.location.origin}/${cleanEndpoint}`;

@@ -4,13 +4,14 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { getApiUrl } from "../config/api";
 
 const MyAddedTicket = () => {
 
       let {user}= useContext(Context)
     
-        const fetchUsers = async () => {
-            const response = await axios.get(`http://localhost:3000/myaddedticket/${user?.email}`);
+        const fetchMyTickets = async () => {
+            const response = await axios.get(getApiUrl(`myaddedticket/${user?.email}`));
             return response.data;
           };
     
@@ -19,7 +20,7 @@ const MyAddedTicket = () => {
        
         const { data: myaddedticket = [], isLoading:myaddedticketLoading,refetch } = useQuery({
             queryKey: [user?.email,"myaddedticket"], // The unique key for this query
-            queryFn: fetchUsers, // Function to fetch the data
+            queryFn: fetchMyTickets, // Function to fetch the data
           });
 
           const handleDelete = (id) => {
@@ -34,7 +35,7 @@ const MyAddedTicket = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/tickets/${id}`);
+          await axios.delete(getApiUrl(`api/tickets/${id}`));
           refetch();
           Swal.fire('Deleted!', 'Ticket has been deleted.', 'success');
         } catch (err) {

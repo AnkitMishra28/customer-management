@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
+import { getApiUrl } from "../config/api";
 
 export default function AddTaskExecutives() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export default function AddTaskExecutives() {
     };
 
     try {
-      const res = await axios.post("http://localhost:3000/api/tasks", newTask);
+      const res = await axios.post(getApiUrl("api/tasks"), newTask);
 
       if (res.data.insertedId || res.data.success) {
         Swal.fire({

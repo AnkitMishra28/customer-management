@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Context } from '../provider/AuthProvider';
 import { Parallax } from 'react-parallax';
 import bg from "../assets/bg1.jpg"
+import { getApiUrl } from "../config/api";
 
 
 const EmployeesReviews = () => {
@@ -12,7 +13,7 @@ const EmployeesReviews = () => {
   //  let {darkmode}=useContext(Context)
 
     const fetchUsers = async () => {
-        const response = await axios.get(`http://localhost:3000/api/review`);
+        const response = await axios.get(getApiUrl(`api/review`));
         return response.data;
       };
 

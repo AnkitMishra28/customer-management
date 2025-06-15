@@ -5,21 +5,22 @@ import Loading from '../component/loading';
 import Swal from 'sweetalert2';
 import { motion } from "framer-motion";
 import { Link } from 'react-router-dom';
+import { getApiUrl } from "../config/api";
 
 
 
 
 const ManageTask = () => {
 
-  const fetchUsers = async () => {
-        const response = await axios.get(`http://localhost:3000/api/tasks`);
-        return response.data;
-      };
+  const fetchTasks = async () => {
+    const response = await axios.get(getApiUrl(`api/tasks`));
+    return response.data;
+  };
 
       
     const { data: task = [], isLoading:taskLoading,refetch } = useQuery({
         queryKey: ["task"], // The unique key for this query
-        queryFn: fetchUsers, // Function to fetch the data
+        queryFn: fetchTasks, // Function to fetch the data
       });
 
 
@@ -34,7 +35,7 @@ const ManageTask = () => {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/api/tasks/${id}`);
+        await axios.delete(getApiUrl(`api/tasks/${id}`));
         refetch()
       
         Swal.fire("Deleted!", "Task has been deleted.", "success");

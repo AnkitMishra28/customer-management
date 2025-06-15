@@ -10,6 +10,7 @@ const port = process.env.PORT || 3000;
 const stripe = require("stripe")(process.env.PAYMENT_KEY);
 const bcrypt = require("bcryptjs");
 
+// Enhanced CORS configuration for production
 app.use(
   cors({
     origin: [
@@ -17,15 +18,22 @@ app.use(
       "https://customer-management-*.vercel.app", // Vercel preview deployments
       "https://customer-management.vercel.app", // Vercel production
       /^https:\/\/.*\.vercel\.app$/, // Any Vercel subdomain
+      /^https:\/\/.*\.vercel\.app$/, // Any Vercel subdomain
     ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
 );
 
 app.use(cookieParser());
-
 app.use(express.json());
-// app.use(cors());
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 // console.log(process.env.Sending_API_Key)
 
@@ -71,7 +79,21 @@ app.get("/health", (req, res) => {
   res.json({ 
     status: "OK", 
     message: "CRM Server is running", 
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    hasDbUser: !!process.env.DB_USER,
+    hasDbPassword: !!process.env.DB_PASSWORD,
+    hasJwtSecret: !!process.env.JWT_Secret
+  });
+});
+
+// Test endpoint for debugging
+app.get("/test", (req, res) => {
+  res.json({
+    message: "Server is responding",
+    timestamp: new Date().toISOString(),
+    headers: req.headers,
+    cookies: req.cookies
   });
 });
 

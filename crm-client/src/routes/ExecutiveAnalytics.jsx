@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Context } from '../provider/AuthProvider';
 import Loading from '../component/loading.jsx';
+import { getApiUrl } from '../config/api';
 import {
   FaChartLine,
   FaUsers,
@@ -25,7 +26,7 @@ const ExecutiveAnalytics = () => {
         withCredentials: true,
       };
       // Now calling the executive-specific endpoint
-      const response = await axios.get('http://localhost:3000/executive/performance-metrics', config);
+      const response = await axios.get(getApiUrl('executive/performance-metrics'), config);
       return response.data; 
     } catch (error) {
       console.error("Error fetching executive performance metrics:", error);
@@ -35,7 +36,7 @@ const ExecutiveAnalytics = () => {
 
   // Fetch executive's overdue follow-ups
   const fetchMyOverdueFollowups = async () => {
-    const response = await axios.get('http://localhost:3000/executive/followup-reminders', {
+    const response = await axios.get(getApiUrl('executive/followup-reminders'), {
       withCredentials: true,
     });
     return response.data;

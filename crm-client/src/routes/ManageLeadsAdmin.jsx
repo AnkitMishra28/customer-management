@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { Context } from "../provider/AuthProvider";
 import Loading from "../component/loading.jsx";
+import { getApiUrl } from "../config/api";
 
 const ManageLeadsAdmin = () => {
   const { user } = useContext(Context);
@@ -25,7 +26,7 @@ const ManageLeadsAdmin = () => {
           maxExpectedClosureDate: filterMaxDate || undefined,
         },
       };
-      const response = await axios.get('http://localhost:3000/admin/leads', config);
+      const response = await axios.get(getApiUrl('admin/leads'), config);
       return response.data;
     } catch (error) {
       console.error("Error fetching leads:", error);

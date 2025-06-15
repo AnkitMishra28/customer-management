@@ -4,13 +4,14 @@ import { Context } from "../provider/AuthProvider";
 import Swal from "sweetalert2";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { getApiUrl } from "../config/api";
 
 const MyTask = () => {
   let { user } = useContext(Context);
 
-  const fetchUsers = async () => {
+  const fetchMyTasks = async () => {
     const response = await axios.get(
-      `http://localhost:3000/mytask/${user?.email}`
+      getApiUrl(`mytask/${user?.email}`)
     );
     return response.data;
   };
@@ -21,7 +22,7 @@ const MyTask = () => {
     refetch,
   } = useQuery({
     queryKey: [user?.email, "mytask"], // The unique key for this query
-    queryFn: fetchUsers, // Function to fetch the data
+    queryFn: fetchMyTasks, // Function to fetch the data
   });
 
   const handleStatusChange = async (taskId, newStatus, deadline) => {
@@ -34,7 +35,7 @@ const MyTask = () => {
 
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/tasks/${taskId}`,
+        getApiUrl(`api/tasks/${taskId}`),
         {
           status: newStatus,
         }

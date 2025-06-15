@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import Loading from '../component/loading.jsx';
 import { Context } from '../provider/AuthProvider';
+import { getApiUrl } from "../config/api";
 
 const ActivityLog = () => {
   const { user } = useContext(Context);
@@ -14,7 +15,7 @@ const ActivityLog = () => {
       const config = {
         withCredentials: true,
       };
-      const response = await axios.get('http://localhost:3000/admin/activity-logs', config);
+      const response = await axios.get(getApiUrl('admin/activity-logs'), config);
       return response.data;
     } catch (error) {
       console.error("Error fetching activity logs:", error);

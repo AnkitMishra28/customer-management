@@ -4,12 +4,13 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { motion } from 'framer-motion';
+import { getApiUrl } from "../config/api";
 
 const MyFollowUp = () => {
   const { user } = useContext(Context);
 
-  const fetchFollowUps = async () => {
-    const res = await axios.get(`http://localhost:3000/myfollowUp/${user?.email}`);
+  const fetchMyFollowUps = async () => {
+    const res = await axios.get(getApiUrl(`myfollowUp/${user?.email}`));
     return res.data;
   };
 
@@ -19,12 +20,12 @@ const MyFollowUp = () => {
     refetch,
   } = useQuery({
     queryKey: [user?.email, 'followups'],
-    queryFn: fetchFollowUps,
+    queryFn: fetchMyFollowUps,
   });
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:3000/api/followups/${id}`, {
+      await axios.patch(getApiUrl(`api/followups/${id}`), {
         status: newStatus,
       });
       refetch();
@@ -46,7 +47,7 @@ const MyFollowUp = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/api/followups/${id}`);
+          await axios.delete(getApiUrl(`api/followups/${id}`));
           refetch();
           Swal.fire('Deleted!', 'Follow-up has been deleted.', 'success');
         } catch (err) {
