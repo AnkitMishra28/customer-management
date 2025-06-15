@@ -119,6 +119,14 @@
       "dest": "/crm-server/index.js"
     },
     {
+      "src": "/ping",
+      "dest": "/crm-server/index.js"
+    },
+    {
+      "src": "/status",
+      "dest": "/crm-server/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/crm-client/$1"
     }

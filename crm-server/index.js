@@ -84,6 +84,29 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+// Simple test endpoint that doesn't require any environment variables
+app.get("/ping", (req, res) => {
+  res.json({
+    message: "Server is responding",
+    timestamp: new Date().toISOString(),
+    envCheck: {
+      hasDbUser: !!process.env.DB_USER,
+      hasDbPassword: !!process.env.DB_PASSWORD,
+      hasJwtSecret: !!process.env.JWT_Secret,
+      nodeEnv: process.env.NODE_ENV || 'not set'
+    }
+  });
+});
+
+// Basic endpoints that work without database
+app.get("/status", (req, res) => {
+  res.json({
+    status: "Server is running",
+    database: "Not connected",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ 
@@ -1341,7 +1364,8 @@ run().catch((error) => {
   console.log("DB_PASSWORD exists:", !!process.env.DB_PASSWORD);
   console.log("JWT_Secret exists:", !!process.env.JWT_Secret);
   
-  process.exit(1);
+  // Don't exit the process - let the server start without database
+  console.log("Server will start without database connection");
 });
 
 app.listen(port, () => {
