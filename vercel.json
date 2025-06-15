@@ -16,103 +16,111 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/jwt",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/logout",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/users/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/adminCount",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/employeeCount",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/userCount",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/executive/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/manageLead",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/manageFollowup",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/alltickets",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/resolveTicket",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myLead/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myTask/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myreview/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myfollowup/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myfollowUp/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myleads/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/myaddedticket/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/specificTask/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/employees/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/updateemployee/(.*)",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/paymentDetails",
-      "dest": "crm-server/index.js"
+      "dest": "/crm-server/index.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/crm-server/index.js"
+    },
+    {
+      "src": "/test",
+      "dest": "/crm-server/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "crm-client/$1"
+      "dest": "/crm-client/$1"
     }
   ]
 } 
