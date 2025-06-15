@@ -143,17 +143,24 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
+  console.log('Attempting to run MongoDB connection function...');
   try {
+    // Log the URI before attempting connection (masking password)
+    const maskedUri = uri.replace(/:(.*?)/, ':(***)');
+    console.log(`MongoDB URI (masked): ${maskedUri}`);
+
     // Check if we have the required environment variables
     if (!process.env.DB_USER || !process.env.DB_PASSWORD) {
-      console.error('❌ Missing DB_USER or DB_PASSWORD environment variables');
-      console.error('Server will start but database operations will fail');
-      // Don't exit, let the server start but mark as unhealthy
+      console.error('❌ Missing DB_USER or DB_PASSWORD environment variables for MongoDB connection.');
+      console.error('Server will start but database operations will fail.');
       return;
     }
 
+    console.log('Attempting to connect to MongoDB...');
     // Connect the client to the server
     await client.connect();
+    console.log('Successfully connected to MongoDB client.');
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
