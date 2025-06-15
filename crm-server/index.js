@@ -10,6 +10,16 @@ const port = process.env.PORT || 3000;
 const stripe = require("stripe")(process.env.PAYMENT_KEY);
 const bcrypt = require("bcryptjs");
 
+// Check for required environment variables
+const requiredEnvVars = ['DB_USER', 'DB_PASSWORD', 'JWT_Secret'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars);
+  console.error('Please set these variables in Vercel dashboard');
+  // Don't exit, just log the error
+}
+
 // Enhanced CORS configuration for production
 app.use(
   cors({
@@ -83,7 +93,8 @@ app.get("/health", (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     hasDbUser: !!process.env.DB_USER,
     hasDbPassword: !!process.env.DB_PASSWORD,
-    hasJwtSecret: !!process.env.JWT_Secret
+    hasJwtSecret: !!process.env.JWT_Secret,
+    missingEnvVars: missingEnvVars
   });
 });
 
@@ -110,6 +121,14 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    // Check if we have the required environment variables
+    if (!process.env.DB_USER || !process.env.DB_PASSWORD) {
+      console.error('❌ Missing DB_USER or DB_PASSWORD environment variables');
+      console.error('Server will start but database operations will fail');
+      // Don't exit, let the server start but mark as unhealthy
+      return;
+    }
+
     // Connect the client to the server
     await client.connect();
     // Send a ping to confirm a successful connection
@@ -144,30 +163,40 @@ async function run() {
 
     // Define verifyAdmin middleware now that userCollection is available
     verifyAdmin = async (req, res, next) => {
-      const email = req.user.email;
-      const query = { email: email };
-      const user = await userCollection.findOne(query);
-      const isAdmin = user?.role === 'admin';
-      if (!isAdmin) {
-        return res.status(403).send({ message: 'forbidden access' });
+      try {
+        const email = req.user.email;
+        const query = { email: email };
+        const user = await userCollection.findOne(query);
+        const isAdmin = user?.role === 'admin';
+        if (!isAdmin) {
+          return res.status(403).send({ message: 'forbidden access' });
+        }
+        // Log admin access to activity logs
+        logActivity(email, 'Admin Access', { path: req.originalUrl });
+        next();
+      } catch (error) {
+        console.error('Error in verifyAdmin:', error);
+        return res.status(500).send({ message: 'Internal server error' });
       }
-      // Log admin access to activity logs
-      logActivity(email, 'Admin Access', { path: req.originalUrl });
-      next();
     };
 
     // Define verifyExecutive middleware now that userCollection is available
     verifyExecutive = async (req, res, next) => {
-      const email = req.user.email;
-      const query = { email: email };
-      const user = await userCollection.findOne(query);
-      const isExecutive = user?.role === 'executives';
-      if (!isExecutive) {
-        return res.status(403).send({ message: 'forbidden access' });
+      try {
+        const email = req.user.email;
+        const query = { email: email };
+        const user = await userCollection.findOne(query);
+        const isExecutive = user?.role === 'executives';
+        if (!isExecutive) {
+          return res.status(403).send({ message: 'forbidden access' });
+        }
+        // Log executive access to activity logs
+        logActivity(email, 'Executive Access', { path: req.originalUrl });
+        next();
+      } catch (error) {
+        console.error('Error in verifyExecutive:', error);
+        return res.status(500).send({ message: 'Internal server error' });
       }
-      // Log executive access to activity logs
-      logActivity(email, 'Executive Access', { path: req.originalUrl });
-      next();
     };
 
     app.post("/jwt", async (req, res) => {
