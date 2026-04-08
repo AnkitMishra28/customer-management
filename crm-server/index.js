@@ -186,30 +186,38 @@ app.post("/logout", (req, res) => {
 
 const uri = process.env.MONGODB_URI || "";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-  // Add additional connection options for serverless environments
-  connectTimeoutMS: 10000, // Give 10 seconds to establish initial connection
-  socketTimeoutMS: 45000,  // Keep sockets open for 45 seconds before timing out
-  serverSelectionTimeoutMS: 30000, // Still 30 seconds for server selection
-  family: 4,
-});
+let mongoClient;
+
+const getMongoClient = () => {
+  if (!uri) {
+    throw new Error("MONGODB_URI is not configured");
+  }
+
+  if (!mongoClient) {
+    mongoClient = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+      // Add additional connection options for serverless environments
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 30000,
+      family: 4,
+    });
+  }
+
+  return mongoClient;
+};
 
 // Fallback collection resolver for serverless cold starts.
 // These routes are registered outside run() so auth/profile checks don't 404 when initial DB connect fails.
 let collectionsPromise;
 const getCoreCollections = async () => {
-  if (!uri) {
-    throw new Error("MONGODB_URI is not configured");
-  }
-
   if (!collectionsPromise) {
     collectionsPromise = (async () => {
+      const client = getMongoClient();
       await client.connect();
       const database = client.db("CRMDB");
       return {
@@ -315,6 +323,7 @@ async function run() {
       try {
         attempt++;
         console.log(`🔄 Connection attempt ${attempt}/${maxAttempts}...`);
+        const client = getMongoClient();
         
         // Connect the client to the server
         await client.connect();
@@ -336,6 +345,7 @@ async function run() {
       }
     }
 
+    const client = getMongoClient();
     const database = client.db("CRMDB");
     const userCollection = database.collection("users");
     const taskCollection = database.collection("task");
