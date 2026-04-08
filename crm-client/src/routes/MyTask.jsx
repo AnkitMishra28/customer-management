@@ -1,0 +1,79 @@
+import axios from "axios";
+import React, { useContext } from "react";
+import { Context } from "../provider/AuthProvider";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { getApiUrl } from "../config/api";
+
+const MyTask = () => {
+  let { user } = useContext(Context);
+
+  const fetchMyTasks = async () => {
+    const response = await axios.get(
+      getApiUrl(`mytask/${user?.email}`)
+    );
+    return response.data;
+  };
+
+  const {
+    data: mytask = [],
+    isLoading: mytaskLoading,
+    refetch,
+  } = useQuery({
+    queryKey: [user?.email, "mytask"], // The unique key for this query
+    queryFn: fetchMyTasks, // Function to fetch the data
+  });
+
+  return (
+    <div>
+      <motion.div
+        className="p-6 max-w-7xl mx-auto"
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
+          My Tasks
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white shadow-md rounded-lg">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="py-3 px-4">No.</th>
+                <th className="py-3 px-4">Title</th>
+                <th className="py-3 px-4">Description</th>
+                <th className="py-3 px-4">Deadline</th>
+                <th className="py-3 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mytask.map((task, index) => {
+                return (
+                  <tr
+                    key={task._id}
+                    className="border-b hover:bg-gray-50 transition duration-150"
+                  >
+                    <td className="py-3 px-4 font-semibold text-gray-800">
+                      {index + 1}
+                    </td>
+                    <td className="py-3 px-4 text-gray-800">{task.title}</td>
+                    <td className="py-3 px-4 text-gray-800">{task.description}</td>
+                    <td className="py-3 px-4 text-red-600">{task.deadline}</td>
+                    <td className="py-3 px-4 text-gray-800 font-medium">{task.status || "Pending"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {mytask.length === 0 && (
+            <p className="text-center mt-6 text-gray-500">
+              No tasks assigned yet.
+            </p>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default MyTask;
