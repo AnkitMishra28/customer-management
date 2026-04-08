@@ -10,8 +10,8 @@ const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 3000;
 const stripe = require("stripe")(process.env.PAYMENT_KEY);
 
-// Configure DNS servers for MongoDB connection
-if (process.env.DNS_SERVER) {
+// Configure DNS servers for MongoDB connection only for local/dev troubleshooting.
+if (process.env.DNS_SERVER && process.env.NODE_ENV !== "production") {
   dns.setServers([process.env.DNS_SERVER, '8.8.4.4', '1.1.1.1']);
   console.log('✅ Custom DNS configured:', process.env.DNS_SERVER);
 }
@@ -97,6 +97,7 @@ app.get("/ping", (req, res) => {
     message: "Server is responding",
     timestamp: new Date().toISOString(),
     envCheck: {
+      hasMongoUri: !!process.env.MONGODB_URI,
       hasDbUser: !!process.env.DB_USER,
       hasDbPassword: !!process.env.DB_PASSWORD,
       hasJwtSecret: !!process.env.JWT_Secret,
@@ -121,6 +122,7 @@ app.get("/health", (req, res) => {
     message: "CRM Server is running", 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
+    hasMongoUri: !!process.env.MONGODB_URI,
     hasDbUser: !!process.env.DB_USER,
     hasDbPassword: !!process.env.DB_PASSWORD,
     hasJwtSecret: !!process.env.JWT_Secret,
@@ -182,9 +184,7 @@ app.post("/logout", (req, res) => {
     .send({ success: true });
 });
 
-const uri = process.env.MONGODB_URI
-  ? process.env.MONGODB_URI
-  : `mongodb+srv://${encodeURIComponent(process.env.DB_USER || "")}:${encodeURIComponent(process.env.DB_PASSWORD || "")}@cluster0.0gbjyme.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = process.env.MONGODB_URI || "";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -197,12 +197,17 @@ const client = new MongoClient(uri, {
   connectTimeoutMS: 10000, // Give 10 seconds to establish initial connection
   socketTimeoutMS: 45000,  // Keep sockets open for 45 seconds before timing out
   serverSelectionTimeoutMS: 30000, // Still 30 seconds for server selection
+  family: 4,
 });
 
 // Fallback collection resolver for serverless cold starts.
 // These routes are registered outside run() so auth/profile checks don't 404 when initial DB connect fails.
 let collectionsPromise;
 const getCoreCollections = async () => {
+  if (!uri) {
+    throw new Error("MONGODB_URI is not configured");
+  }
+
   if (!collectionsPromise) {
     collectionsPromise = (async () => {
       await client.connect();
@@ -292,9 +297,9 @@ async function run() {
     const maskedUri = uri.replace(/(mongodb\+srv:\/\/)([^:]+):([^@]+)@/, '$1$2:(***)@');
     console.log(`MongoDB URI (masked): ${maskedUri}`);
 
-    // Check if we have the required environment variables
-    if (!process.env.MONGODB_URI && (!process.env.DB_USER || !process.env.DB_PASSWORD)) {
-      console.error('❌ Missing MongoDB configuration. Set MONGODB_URI or both DB_USER and DB_PASSWORD.');
+    // In production, require a full MONGODB_URI to avoid accidental wrong-cluster fallbacks.
+    if (!uri) {
+      console.error('❌ Missing MongoDB configuration. Set MONGODB_URI in environment variables.');
       console.error('Server will start but database operations will fail.');
       return;
     }
@@ -325,19 +330,6 @@ async function run() {
           const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
           console.warn(`⚠️ Connection attempt ${attempt} failed. Retrying in ${waitTime}ms...`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
-          
-          // Create a new client for retry
-          const { MongoClient: NewMongoClient } = require("mongodb");
-          this.client = new NewMongoClient(uri, {
-            serverApi: {
-              version: ServerApiVersion.v1,
-              strict: true,
-              deprecationErrors: true,
-            },
-            connectTimeoutMS: 10000,
-            socketTimeoutMS: 45000,
-            serverSelectionTimeoutMS: 30000,
-          });
         } else {
           throw connectionError;
         }
