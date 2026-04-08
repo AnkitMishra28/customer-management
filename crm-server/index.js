@@ -199,6 +199,92 @@ const client = new MongoClient(uri, {
   serverSelectionTimeoutMS: 30000, // Still 30 seconds for server selection
 });
 
+// Fallback collection resolver for serverless cold starts.
+// These routes are registered outside run() so auth/profile checks don't 404 when initial DB connect fails.
+let collectionsPromise;
+const getCoreCollections = async () => {
+  if (!collectionsPromise) {
+    collectionsPromise = (async () => {
+      await client.connect();
+      const database = client.db("CRMDB");
+      return {
+        userCollection: database.collection("users"),
+        reviewCollection: database.collection("reviews"),
+      };
+    })();
+  }
+  return collectionsPromise;
+};
+
+app.get("/users/admin/:email", async (req, res) => {
+  try {
+    const { userCollection } = await getCoreCollections();
+    const email = req.params.email;
+    const user = await userCollection.findOne({ email });
+    res.send({ admin: user?.role === "admin" });
+  } catch (error) {
+    console.error("Fallback /users/admin error:", error.message);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+});
+
+app.get("/users/executive/:email", async (req, res) => {
+  try {
+    const { userCollection } = await getCoreCollections();
+    const email = req.params.email;
+    const user = await userCollection.findOne({ email });
+    res.send({ executive: user?.role === "executives" });
+  } catch (error) {
+    console.error("Fallback /users/executive error:", error.message);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+});
+
+app.get("/users", async (req, res) => {
+  try {
+    const { userCollection } = await getCoreCollections();
+    const users = await userCollection.find().toArray();
+    res.send(users);
+  } catch (error) {
+    console.error("Fallback /users error:", error.message);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+});
+
+app.post("/users", async (req, res) => {
+  try {
+    const { userCollection } = await getCoreCollections();
+    const users = req.body;
+    const email = users?.email;
+
+    if (!email) {
+      return res.status(400).send({ message: "Email is required" });
+    }
+
+    const existingUser = await userCollection.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send({ message: "Users already existed" });
+    }
+
+    const result = await userCollection.insertOne(users);
+    res.send(result);
+  } catch (error) {
+    console.error("Fallback /users POST error:", error.message);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+});
+
+app.get("/api/review", async (req, res) => {
+  try {
+    const { reviewCollection } = await getCoreCollections();
+    const reviews = await reviewCollection.find().toArray();
+    res.send(reviews);
+  } catch (error) {
+    console.error("Fallback /api/review error:", error.message);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+});
+
 async function run() {
   console.log('Attempting to run MongoDB connection function...');
   try {
