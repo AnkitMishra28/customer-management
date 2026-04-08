@@ -1,49 +1,29 @@
-// API Configuration for different environments
+const LOCAL_BACKEND = "http://localhost:3000";
+
+const isBrowser = typeof window !== "undefined";
+const isDev = import.meta.env.DEV;
+
+// Optional override for non-standard setups.
+const envBase = import.meta.env.VITE_API_BASE_URL;
+
+const isLocalAddress = (value = "") => /localhost|127\.0\.0\.1/i.test(value);
+
 const getApiBaseUrl = () => {
-  // Check if we're in development or production
-  if (import.meta.env.DEV) {
-    // Development environment - use localhost
-    return 'http://localhost:3000';
-  } else {
-    // Production environment - use Vercel deployment URL
-    // This will be the same domain as the frontend, just different path
-    return window.location.origin;
+  if (isDev) {
+    return envBase || LOCAL_BACKEND;
   }
+
+  // In production, never allow loopback targets from browser to avoid CORS/private-network issues.
+  if (envBase && !isLocalAddress(envBase)) {
+    return envBase;
+  }
+
+  return isBrowser ? window.location.origin : "";
 };
 
 export const API_BASE_URL = getApiBaseUrl();
 
-// Helper function to get full API URL
 export const getApiUrl = (endpoint) => {
-  // Remove leading slash if present
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-  
-  if (import.meta.env.DEV) {
-    // In development, use localhost:3000
-    return `http://localhost:3000/${cleanEndpoint}`;
-  } else {
-    // In production, use the same domain
-    // Based on the server routes, most endpoints don't need /api prefix
-    // Only specific endpoints that are explicitly defined with /api in the server
-    const apiPrefixEndpoints = [
-      'api/tasks',
-      'api/leads', 
-      'api/followups',
-      'api/tickets',
-      'api/reviews',
-      'api/notifications',
-      'api/activity-logs'
-    ];
-    
-    // Check if this endpoint should have /api prefix
-    const needsApiPrefix = apiPrefixEndpoints.some(apiEndpoint => 
-      cleanEndpoint.startsWith(apiEndpoint)
-    );
-    
-    if (needsApiPrefix) {
-      return `${window.location.origin}/${cleanEndpoint}`;
-    } else {
-      return `${window.location.origin}/${cleanEndpoint}`;
-    }
-  }
-}; 
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
+  return `${API_BASE_URL}/${cleanEndpoint}`;
+};
